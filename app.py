@@ -873,12 +873,8 @@ def has_uid_prefix(s):
     s = s.strip()
     if s.startswith("無病歷號"):
         return True, "無病歷號", s.replace("無病歷號", "", 1).strip()
-    
-    # 🌟 智慧過濾時間字串與冒號：含有冒號代表為時間備註，絕對不是病歷號！
-    if ":" in s:
-        return False, None, s
         
-    # 🌟 智慧過濾電話號碼：如果整行是 9~10 碼且以 0 開頭，這絕對是電話，不是病歷號！
+    # 🌟 智慧過濾電話號碼：如果整行是 9~10 码且以 0 開頭，這絕對是電話，不是病歷號！
     if s.isdigit() and len(s) in [9, 10] and s.startswith('0'):
         return False, None, s
         
@@ -890,6 +886,11 @@ def has_uid_prefix(s):
         else:
             break
     suffix = s[len(prefix):]
+    
+    # 🌟 智慧過濾時間字串：如果 prefix 後面緊接著冒號 ':' (如 12:30 中的 '12' 緊接 ':')，代表此 prefix 為時間小時數，絕對不是病歷號！
+    if suffix.startswith(':'):
+        return False, None, s
+        
     if prefix and any(c.isdigit() for c in prefix):
         # 🌟 智慧過濾電話號碼 (prefix形式)：如果prefix長度是 9~10 碼且以 0 開頭，也代表是電話，不是病歷號！
         if len(prefix) in [9, 10] and prefix.startswith('0'):
